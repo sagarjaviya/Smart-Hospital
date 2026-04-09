@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Doctor Dashboard - Smart Hospital</title>
+
+    <style>
+        :root {
+            --primary-blue: #0b66c3;
+            --bg-light: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+        }
+
+
+
+        .header {
+            background: white;
+            padding: 10px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+
+
+        /* 1. Portal Title click par Home par jayega */
+
+        .portal-title {
+
+            margin: 0;
+
+            font-size: 18px;
+
+            cursor: pointer;
+
+            color: #333;
+
+            transition: color 0.2s;
+
+        }
+
+        .portal-title:hover {
+            color: var(--primary-blue);
+        }
+
+
+
+        .doc-profile {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-blue);
+        }
+
+        .container {
+            display: flex;
+            padding: 30px 5%;
+            gap: 30px;
+        }
+
+        .now-serving-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            width: 300px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .serving-box {
+            background: #eef5ff;
+            border-radius: 10px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            border: 1px solid #d0e3ff;
+        }
+
+        .token-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .queue-section {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .call-btn {
+            width: 100%;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .call-btn:hover {
+            background: #084c98;
+        }
+
+        .header img {
+            filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .portal-title {
+            font-size: 22px !important;
+            /* Slightly larger for the brand name */
+            text-transform: uppercase;
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <header class="header">
+
+        <div onclick="window.location.href='index.html'"
+            style="cursor: pointer; display: flex; align-items: center; gap: 12px;">
+            <img src="logo.png" alt="Smart Hospital Logo" style="width: 35px; height: 35px; object-fit: contain;">
+            <h2 class="portal-title" style="margin: 0; color: #0b66c3; font-weight: bold; letter-spacing: 1px;">
+                Smart Hospital
+            </h2>
+        </div>
+
+
+        <div style="display: flex; align-items: center; gap: 15px;">
+
+            <div style="text-align: right;">
+
+                <div id="displaySpecialty" style="font-size: 11px; color: var(--primary-blue); font-weight: bold;">
+                    SPECIALTY: LOADING...</div>
+
+                <div id="displayName" style="font-weight: bold;">Doctor Name</div>
+
+            </div>
+
+            <img src="https://cdn-icons-png.flaticon.com/512/387/387561.png" class="doc-profile">
+
+            <button onclick="logoutDoctor()"
+                style="padding: 5px 10px; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; background: white;">Logout</button>
+
+        </div>
+
+    </header>
+
+
+
+    <div class="container">
+
+        <div class="now-serving-card">
+            <h3 style="color: var(--primary-blue); text-align: left; margin-top: 0;">Now Serving</h3>
+            <div class="serving-box">
+                <div class="token-display" id="nowServingID">---</div>
+            </div>
+            <p id="patientNameDisplay" style="color: #666; font-weight: 600;">No active patient</p>
+
+            <button class="call-btn" onclick="callNextPatient()">Call Next Patient</button>
+
+            <button class="call-btn" onclick="completeAppointment()"
+                style="background: #28a745; margin-top: 10px;">Finish Session</button>
+        </div>
+
+
+
+        <div class="queue-section">
+
+            <h3 style="color: var(--primary-blue); margin-top: 0;">Live Waiting Queue</h3>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Token</th>
+
+                        <th>Patient Name</th>
+
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="queueBody">
+
+                    <tr>
+                        <td colspan="3" style="text-align:center; padding:40px; color:#999;">Waiting for connection to
+                            server...</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        // Variable to store the current top token
+        let currentToken = null;
+
+        // 1. Fetch Appointments from the Database
+        async function refreshQueue() {
+            try {
+                const response = await fetch('/api/appointments/all');
+                const data = await response.json();
+
+                const tbody = document.getElementById('queueBody');
+                tbody.innerHTML = "";
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px;">No pending appointments</td></tr>`;
+                    document.getElementById('nowServingID').innerText = "---";
+                    document.getElementById('patientNameDisplay').innerText = "No active patient";
+                    currentToken = null;
+                    return;
+                }
+
+                const nextPatient = data[0];
+                document.getElementById('nowServingID').innerText = nextPatient.token_number;
+                document.getElementById('patientNameDisplay').innerText = nextPatient.patient_name;
+                currentToken = nextPatient.token_number;
+
+                data.forEach(appt => {
+                    // Logic to change color based on status
+                    const statusColor = appt.status === 'Called' ? '#0b66c3' : 'orange';
+
+                    tbody.innerHTML += `
+                <tr>
+                    <td><strong>${appt.token_number}</strong></td>
+                    <td>${appt.patient_name}</td>
+                    <td><span style="color: ${statusColor}; font-weight: bold;">${appt.status}</span></td>
+                </tr>
+            `;
+                });
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
+        }
+
+        async function callNextPatient() {
+            if (!currentToken) {
+                alert("Queue is empty!");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/call-next', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tokenNumber: currentToken })
+                });
+
+                if (response.ok) {
+                    // This matches the notification alert in your screenshot
+                    alert("Patient Notified! Updating queue...");
+                    await refreshQueue(); // Immediately refreshes the table to show 'Called'
+                } else {
+                    const result = await response.json();
+                    alert("Error: " + result.error);
+                }
+            } catch (err) {
+                alert("Server is not responding.");
+            }
+        }
+        // 3. Load doctor info from localStorage (Set during login)
+        function loadDoctorInfo() {
+            const doctor = JSON.parse(localStorage.getItem('doctorUser'));
+            if (doctor) {
+                document.getElementById('displayName').innerText = "Dr. " + doctor.name;
+                document.getElementById('displaySpecialty').innerText = "SPECIALTY: " + doctor.specialization.toUpperCase();
+            }
+        }
+
+        // Run functions on page load
+        window.onload = () => {
+            loadDoctorInfo();
+            refreshQueue();
+            // Auto-refresh the queue every 30 seconds
+            setInterval(refreshQueue, 30000);
+        };
+        async function completeAppointment() {
+            if (!currentToken) return alert("No active patient to finish!");
+
+            if (confirm("Are you sure the checkup is finished?")) {
+                try {
+                    const response = await fetch('/api/complete-appointment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tokenNumber: currentToken })
+                    });
+
+                    if (response.ok) {
+                        alert("Session Completed!");
+                        // REFRESH QUEUE IMMEDIATELY TO REMOVE COMPLETED PATIENT
+                        await refreshQueue();
+                    }
+                } catch (err) {
+                    console.error("Error completing appointment:", err);
+                }
+            }
+        }
+        function logoutDoctor() {
+            if (confirm("Are you sure you want to logout?")) {
+                // 1. Clear the doctor's saved data so they can't just click 'Back'
+                localStorage.removeItem('doctorUser');
+
+                // 2. Redirect to your login page. 
+                // CHANGE 'doctor-login.html' to whatever your login file is actually named!
+                window.location.href = 'doctor-login.html';
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

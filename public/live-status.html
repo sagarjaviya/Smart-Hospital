@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Queue Status - Smart Hospital</title>
+    <style>
+        :root { --primary-blue: #0b66c3; --bg-light: #f4f7f6; --danger: #d9534f; --success: #28a745; }
+        
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-light); margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Navigation Header */
+        .nav-header { background: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .logo { font-weight: bold; font-size: 1.2em; color: var(--primary-blue); }
+        .logout-btn { color: var(--primary-blue); text-decoration: none; font-weight: 600; cursor: pointer; border: 1px solid var(--primary-blue); padding: 5px 15px; border-radius: 5px; transition: 0.3s; }
+        .logout-btn:hover { background: var(--primary-blue); color: white; }
+
+        .main-container { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 70px); padding: 20px; }
+        
+        .status-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        
+        /* Welcome Section */
+        .welcome-section { text-align: left; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .welcome-section h2 { margin: 0; color: var(--primary-blue); font-size: 22px; }
+        .welcome-section p { margin: 5px 0 0; color: #666; font-size: 14px; }
+
+        /* Current Serving Box */
+        .current-box { background: #eef5ff; border: 2px solid var(--primary-blue); padding: 20px; border-radius: 12px; margin: 20px 0; position: relative; }
+        .current-label { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary-blue); color: white; padding: 2px 15px; border-radius: 10px; font-size: 11px; text-transform: uppercase; font-weight: bold; }
+        .token-num { font-size: 54px; font-weight: bold; color: var(--primary-blue); margin: 10px 0; }
+        
+        /* Live Indicator */
+        .live-tag { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--success); font-weight: 600; font-size: 14px; margin-bottom: 15px; }
+        .dot { height: 10px; width: 10px; background-color: var(--success); border-radius: 50%; display: inline-block; animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* Info Grid */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .info-item { background: #fdfdfd; padding: 15px; border-radius: 10px; border: 1px solid #eee; text-align: center; }
+        .info-item small { display: block; color: #888; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; }
+        .info-item span { font-size: 18px; font-weight: bold; color: #333; }
+
+        .wait-time { font-size: 18px; color: #666; margin: 15px 0; font-weight: 500; }
+
+        /* Action Buttons */
+        .button-group { display: flex; gap: 10px; margin-top: 25px; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; border: 1px solid #ddd; font-size: 14px; }
+        
+        .btn-refresh { background: var(--primary-blue); color: white; border: none; width: 100%; margin-top: 10px; }
+        .btn-download { background: white; color: #333; }
+        .btn-cancel { background: white; color: var(--danger); border-color: var(--danger); }
+        .btn-cancel:hover { background: var(--danger); color: white; }
+
+        .sync-text { font-size: 11px; color: #999; margin-top: 15px; display: block; }
+    </style>
+</head>
+<body>
+
+    <header class="nav-header">
+        <div class="logo">Smart Hospital</div>
+        <div onclick="logoutProfile()" class="logout-btn">Logout Profile</div>
+    </header>
+
+    <div class="main-container">
+        <div class="status-card">
+            <div class="welcome-section">
+                <h2>Welcome, <span id="pName">Patient</span></h2>
+                <p>Your token is active. Please wait for your turn.</p>
+            </div>
+
+            <div class="live-tag">
+                <span class="dot"></span> Live Queue Tracking
+            </div>
+
+            <div class="current-box">
+                <div class="current-label">Currently Serving</div>
+                <div class="token-num" id="nowServing">---</div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <small>Your Token</small>
+                    <span id="yourToken">--</span>
+                </div>
+                <div class="info-item">
+                    <small>Patients Ahead</small>
+                    <span id="patientsAhead" style="color: var(--primary-blue);">--</span>
+                </div>
+            </div>
+
+            <p class="wait-time" id="waitTimeDisplay">Connecting to live queue...</p>
+
+            <div class="button-group">
+                <button class="btn btn-download" onclick="window.print()">Download Token</button>
+                <button class="btn btn-cancel" onclick="cancelTurn()">Cancel Turn</button>
+            </div>
+
+            <button class="btn btn-refresh" onclick="manualRefresh()">Refresh Status 🔄</button>
+            
+            <span class="sync-text" id="syncStatus">Ready to sync</span>
+        </div>
+    </div>
+
+<script>
+    // 1. Fetching Logic (Now connected to Backend)
+    async function fetchLiveStatus() {
+        // Get the token from LocalStorage (Saved when patient booked)
+        const myToken = localStorage.getItem('activeToken'); 
+        const patientName = localStorage.getItem('loggedInUser');
+
+        if (!myToken) {
+            alert("No active token found. Redirecting to home.");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        try {
+            // Fetch live queue data from your API
+            const response = await fetch(`http://localhost:5000/api/queue-status/${myToken}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update the UI with real data from database
+                updateUI(myToken, data.nowServing || "---", data.patientsAhead, patientName);
+                document.getElementById('syncStatus').innerText = "Last Updated: " + new Date().toLocaleTimeString();
+            }
+        } catch (err) {
+            console.error("Fetch error:", err);
+            document.getElementById('syncStatus').innerText = "Connection Error ❌";
+        }
+    }
+
+    function manualRefresh() {
+        const btn = document.querySelector('.btn-refresh');
+        btn.innerHTML = "Syncing... ⌛";
+        btn.disabled = true;
+        
+        fetchLiveStatus().then(() => {
+            setTimeout(() => {
+                btn.innerHTML = "Refresh Status 🔄";
+                btn.disabled = false;
+            }, 800);
+        });
+    }
+
+    // 2. UI Update Logic (Matches your existing design)
+    function updateUI(myToken, serving, ahead, patientName) {
+        document.getElementById('pName').innerText = patientName || "Patient";
+        document.getElementById('yourToken').innerText = myToken;
+        document.getElementById('nowServing').innerText = serving;
+        document.getElementById('patientsAhead').innerText = ahead;
+
+        const waitDisplay = document.getElementById('waitTimeDisplay');
+        
+        if (myToken === serving) {
+            waitDisplay.innerHTML = `<span style="color: var(--success); font-weight:bold; font-size: 1.2em;">🔥 IT IS YOUR TURN! CHECK YOUR EMAIL!</span>`;
+        } else if (ahead > 0) {
+            waitDisplay.innerHTML = `Estimated wait time: <span style="color:var(--danger)">${ahead * 5} mins</span>`;
+        } else {
+            waitDisplay.innerHTML = `<span style="color: var(--primary-blue); font-weight:bold;">You are next in line!</span>`;
+        }
+    }
+
+    // 3. Logout Logic
+    function logoutProfile() {
+        if(confirm("Are you sure you want to logout?")) {
+            localStorage.clear(); // Clear local session
+            window.location.href = 'index.html'; 
+        }
+    }
+
+    // 4. Cancel Turn Logic
+    function cancelTurn() {
+        if(confirm("Are you sure you want to cancel your turn? This will delete your token.")) {
+            // Optional: Call a backend delete route here
+            localStorage.removeItem('tempTokenID');
+            window.location.href = 'index.html';
+        }
+    }
+
+    // Auto-sync every 15 seconds (reduced from 30 for better UX)
+    setInterval(fetchLiveStatus, 15000);
+    window.onload = fetchLiveStatus;
+</script>
+
+</body>
+</html>

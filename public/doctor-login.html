@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal - Smart Hospital</title>
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --success-green: #28a745;
+            --bg-light: #f8f9fa;
+            --text-muted: #6c757d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+            border-bottom: 3px solid var(--primary-blue);
+            margin-bottom: -2px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; font-size: 14px; }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: #fdfdfd;
+        }
+
+        input:focus { border-color: var(--primary-blue); outline: none; }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .login-btn { background-color: var(--primary-blue); }
+        .register-btn { background-color: var(--success-green); }
+
+        .hint { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="auth-card">
+    <div class="auth-tabs">
+        <div id="loginTab" class="tab active" onclick="showForm('login')">Staff Login</div>
+        <div id="registerTab" class="tab" onclick="showForm('register')">Register Doctor</div>
+    </div>
+
+    <form id="loginForm" onsubmit="handleAuth(event, 'login')">
+        <div class="form-group">
+            <label>Staff Email Address</label>
+            <input type="email" id="loginEmail" placeholder="name@hospital.com" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPass" placeholder="Enter password" required>
+        </div>
+        <button type="submit" class="btn login-btn">Access Dashboard</button>
+    </form>
+
+    <form id="registerForm" class="hidden" onsubmit="handleAuth(event, 'register')">
+        <div class="form-group">
+            <label>Doctor Full Name (Without 'Dr.')</label>
+            <input type="text" id="docName" placeholder="Vivek Dev" required>
+        </div>
+        <div class="form-group">
+            <label>Staff Email Address</label>
+            <input type="email" id="docEmail" placeholder="name@hospital.com" required>
+        </div>
+        <div class="form-group">
+            <label>Specialty</label>
+            <select id="docSpecialty" required>
+                <option value="">-- Select Specialty --</option>
+                <option value="General Medicine">General Medicine</option>
+                <option value="ORTHO">Orthopedics (ORTHO)</option>
+                <option value="Pediatrics">Pediatrics</option>
+                <option value="ENT">ENT Specialists</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Create Password</label>
+            <input type="password" id="docPass" placeholder="Min. 6 chars + @#$" required>
+            <div class="hint">Use at least 6 letters and one special character (!@#$)</div>
+        </div>
+        <button type="submit" class="btn register-btn">Register Account</button>
+    </form>
+</div>
+
+<script>
+    function showForm(type) {
+        document.getElementById('loginForm').classList.toggle('hidden', type !== 'login');
+        document.getElementById('registerForm').classList.toggle('hidden', type !== 'register');
+        document.getElementById('loginTab').classList.toggle('active', type === 'login');
+        document.getElementById('registerTab').classList.toggle('active', type === 'register');
+    }
+
+    // Backend Ready Auth Handler
+ async function handleAuth(event, type) {
+    event.preventDefault();
+    
+    try {
+        if (type === 'register') {
+            const name = document.getElementById('docName').value;
+            const email = document.getElementById('docEmail').value;
+            const password = document.getElementById('docPass').value;
+            const specialization = document.getElementById('docSpecialty').value;
+
+            const response = await fetch('/api/auth/doctor-register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, specialization })
+            });
+
+            if (response.ok) {
+                alert("Doctor Registered Successfully!");
+                showForm('login');
+            } else {
+                const errorData = await response.json();
+                alert("Registration Failed: " + (errorData.error || "Unknown error"));
+            }
+        } else {
+            // LOGIN LOGIC
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+
+            const response = await fetch('/api/auth/doctor-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Storing the doctor object for use in the dashboard
+                localStorage.setItem('doctorUser', JSON.stringify(data.doctor));
+                window.location.href = 'doctor-dashboard.html';
+            } else {
+                const errorData = await response.json();
+                alert("Login Failed: " + (errorData.error || "Invalid Credentials"));
+            }
+        }
+    } catch (err) {
+        console.error("Auth Error:", err);
+        alert("Connection Error! Please ensure the server is running.");
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Token - Smart Hospital</title>
+    <style>
+        :root {
+            --primary-blue: #0b66c3;
+            --bg-light: #f4f7f6;
+            --success-green: #28a745;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 80vh;
+            align-items: center;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+            letter-spacing: 2px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-live {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .btn-home {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        #tokenResult {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .token-circle {
+            width: 160px;
+            height: 160px;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            font-weight: bold;
+            margin: 15px auto;
+            box-shadow: 0 10px 20px rgba(11, 102, 195, 0.3);
+            border: 5px solid white;
+        }
+
+        .doctor-badge {
+            background: #eef5ff;
+            color: var(--primary-blue);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+            border: 1px solid #d0e3ff;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card" id="verificationStep">
+        <h2 style="color: var(--primary-blue);">Enter Appointment ID</h2>
+        <p style="color:#666;">Please enter the Appointment ID you received after booking.</p>
+
+        <input type="text" id="inputApptID" placeholder="APP-XXXX">
+
+        <button class="btn btn-primary" onclick="verifyAndGenerate()">Generate Token</button>
+    </div>
+
+    <div class="card" id="tokenResult">
+        <h2 style="color: var(--success-green);">Token Generated!</h2>
+
+        <div class="doctor-badge" id="doctorNameDisplay">Doctor: ---</div>
+
+        <p>Your queue number is:</p>
+
+        <div class="token-circle" id="finalTokenDisplay">--</div>
+
+        <p style="margin-bottom: 20px; font-weight: bold;">Please wait for your turn.</p>
+
+        <div class="button-group">
+            <button class="btn btn-live" onclick="window.location.href='live-status.html'">
+                Check Live Status 🕒
+            </button>
+
+            <button class="btn btn-home" onclick="window.location.href='index.html'">
+                Back to Home
+            </button>
+        </div>
+    </div>
+    <script>
+        async function verifyAndGenerate() {
+            const enteredID = document.getElementById('inputApptID').value.trim();
+
+            if (enteredID === "") {
+                alert("Please enter a valid Appointment ID!");
+                return;
+            }
+
+            try {
+                // We use the full URL to ensure it connects to your Node server on Port 5000
+                const response = await fetch(`http://localhost:5000/api/queue-status/${enteredID}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Call the UI function with data from the database
+                    showTokenUI(
+                        enteredID,
+                        data.doctor_id || "Assigned Doctor",
+                        data.patient_name || "Patient"
+                    );
+                } else {
+                    alert("Appointment ID not found in database!");
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+                alert("Connection error! Make sure server.js is running.");
+            }
+        }
+
+        // THIS WAS MISSING: This function reveals the token result on the screen
+        function showTokenUI(tokenNum, doctorName, patientName) {
+            // SAVE THE TOKEN FOR LIVE STATUS
+            localStorage.setItem('activeToken', tokenNum);
+
+            document.getElementById('verificationStep').style.display = 'none';
+            document.getElementById('tokenResult').style.display = 'block';
+
+            document.getElementById('finalTokenDisplay').innerText = tokenNum;
+            document.getElementById('doctorNameDisplay').innerText = "Doctor: " + doctorName;
+        }
+    </script>
+
+</body>
+
+</html>

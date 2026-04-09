@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Registration - Smart Hospital</title>
+    <style>
+        :root {
+            --primary-blue: #0b66c3;
+            --bg-light: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-light);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            color: var(--primary-blue);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        /* Chrome, Safari, Edge, Opera se arrows hatane ke liye */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #28a745;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #218838;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .link a {
+            color: var(--primary-blue);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>New Patient Registration</h2>
+
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="Enter your name">
+
+        <label>Phone Number</label>
+        <input type="number" id="regPhone" placeholder="10-digit mobile number">
+
+        <label>Age</label>
+        <input type="number" id="regAge" placeholder="Age (e.g. 25)">
+
+        <button class="btn" onclick="handleRegister()">Complete Registration</button>
+        <div class="link">Already have an account? <a href="patient-login.html">Login Here</a></div>
+    </div>
+
+    <script>
+       async function handleRegister() {
+    const name = document.getElementById('regName').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const age = document.getElementById('regAge').value.trim();
+
+    // 1. Check if fields are empty
+    if (!name || !phone || !age) {
+        alert("Please fill all fields.");
+        return;
+    }
+
+    // 2. Check if phone is exactly 10 digits
+    if (phone.length !== 10) {
+        alert("Please enter a valid 10-digit phone number.");
+        return;
+    }
+
+    // 3. Prepare data (Added 'email' and 'password' to match your Controller)
+    const patientData = { 
+        name, 
+        phone, 
+        age, 
+        email: phone + "@hospital.com", 
+        password: "password123" 
+    };
+
+    try {
+        // FIXED URL: added '/auth' to match your server.js
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(patientData)
+        });
+
+        if (response.ok) {
+            alert("Registration Successful! Please login with your phone number.");
+            
+            // CHANGE THIS LINE:
+            window.location.href = 'patient-login.html'; 
+        } else {
+            const errorData = await response.json();
+            alert("Error: " + (errorData.error || "Failed to save data."));
+        }
+    } catch (err) {
+        alert("Server not running! Please start node server.js");
+    }
+}
+    </script>
+</body>
+
+</html>

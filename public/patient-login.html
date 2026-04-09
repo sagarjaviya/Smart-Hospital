@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Login - Smart Hospital</title>
+    <style>
+        :root { --primary-blue: #0b66c3; --bg-light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-light); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; }
+        label { display: block; margin: 10px 0 5px; font-weight: 600; color: #555; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        /* Spin buttons hatane ke liye (optional but clean) */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .btn { width: 100%; padding: 15px; margin-top: 20px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; background: var(--primary-blue); color: white; transition: 0.3s; }
+        .btn:hover { background: #0056b3; }
+        .link { text-align: center; margin-top: 15px; font-size: 14px; color: #666; }
+        .link a { color: var(--primary-blue); text-decoration: underline; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Patient Login</h2>
+        <label>Registered Phone Number</label>
+        <input type="number" id="loginPhone" placeholder="Enter 10-digit number">
+        
+        <button class="btn" onclick="handleLogin()">Login & Proceed</button>
+        <div class="link">New user? <a href="patient-register.html">Register Here</a></div>
+    </div>
+
+    <script>
+        async function handleLogin() {
+    const phone = document.getElementById('loginPhone').value.trim();
+
+    if(!phone || phone.length !== 10) {
+        alert("Please enter a valid 10-digit phone number.");
+        return;
+    }
+
+    try {
+        // We call the backend to check if this number exists
+        const response = await fetch('/api/auth/login-patient', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phone })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Success! Store user info and go to appointment
+            localStorage.setItem('loggedInUser', data.user.name);
+            localStorage.setItem('userPhone', data.user.phone);
+            window.location.href = 'appointment.html';
+        } else {
+            // This happens if the number is not in the database
+            alert("This number is not registered. Please register first.");
+            window.location.href = 'patient-register.html';
+        }
+    } catch (err) {
+        alert("Server error. Please try again later.");
+    }
+}
+    </script>
+</body>
+</html>
