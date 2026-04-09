@@ -1,27 +1,50 @@
 const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
-const cors = require('cors'); // 1. Import it at the top
+const cors = require('cors');
+const db = require('./config/db'); // 1. Import your database connection
 
-// 2. Load Environment Variables
 dotenv.config();
 
-// 3. Initialize app FIRST (This fixes your ReferenceError)
 const app = express(); 
 
-// 4. Middlewares (Now you can use 'app')
+// 2. Database Initialization Script (This builds your tables automatically)
+const initDb = async () => {
+    try {
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS doctors (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                specialization VARCHAR(255) NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS patients (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                phone VARCHAR(20) UNIQUE NOT NULL,
+                age INT
+            );
+        `);
+        console.log("✅ Database tables are verified and ready!");
+    } catch (err) {
+        console.error("❌ Database Init Error:", err.message);
+    }
+};
+initDb();
+
 app.use(cors()); 
 app.use(express.json()); 
 app.use(express.static(path.join(__dirname, 'public'))); 
 
-// 5. Import and Use Routes
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 app.use('/api', appointmentRoutes);
 app.use('/api/auth', authRoutes);
 
-// 6. Start the Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`✅ MVC Server is running!`);
