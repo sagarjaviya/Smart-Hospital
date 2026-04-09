@@ -10,6 +10,7 @@
             --bg-light: #f4f7f6;
             --emergency-red: #d32f2f;
             --success-green: #28a745;
+            --ticket-bg: #fff9c4;
         }
 
         body {
@@ -19,15 +20,18 @@
             padding: 20px;
             display: flex;
             justify-content: center;
+            min-height: 100vh;
+            align-items: center;
         }
 
         .card {
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 450px;
+            transition: all 0.3s ease;
         }
 
         .header {
@@ -68,22 +72,30 @@
         .btn {
             width: 100%; padding: 15px; background: var(--primary-blue); color: white;
             border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
-            cursor: pointer; margin-top: 20px;
+            cursor: pointer; margin-top: 20px; transition: 0.2s;
         }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
         /* Success View Styling */
-        #successView { display: none; text-align: center; }
+        #successView { display: none; text-align: center; animation: fadeIn 0.5s ease-out; }
+        
+        .success-icon {
+            font-size: 50px; color: var(--success-green); 
+            background: #e8f5e9; width: 80px; height: 80px; 
+            line-height: 80px; border-radius: 50%; margin: 0 auto 15px;
+        }
+
         .appt-id-box {
-            background: #eef5ff;
-            border: 2px dashed var(--primary-blue); /* The Border you wanted */
+            background: var(--ticket-bg);
+            border: 2px dashed #fbc02d;
             padding: 20px;
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary-blue);
             border-radius: 8px;
-            margin: 15px 0;
+            margin: 20px 0;
             position: relative;
         }
+
+        .id-label { font-size: 12px; text-transform: uppercase; color: #888; display: block; }
+        .id-number { font-size: 32px; font-weight: bold; color: #333; letter-spacing: 1px; }
 
         .summary-box {
             text-align: left;
@@ -94,7 +106,15 @@
             border-left: 4px solid var(--primary-blue);
         }
 
-        #copyMsg { color: var(--success-green); font-size: 12px; font-weight: bold; display: none; }
+        .summary-box p { margin: 8px 0; color: #555; display: flex; justify-content: space-between; }
+        .summary-box strong { color: #222; }
+
+        #copyMsg { color: var(--success-green); font-size: 12px; font-weight: bold; display: none; margin-bottom: 5px;}
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -142,19 +162,22 @@
         </div>
 
         <div id="successView">
-            <div style="font-size: 50px; color: var(--success-green);">✓</div>
-            <h2 style="margin-top:10px;">Success!</h2>
-            <p>Please note your Appointment ID:</p>
+            <div class="success-icon">✓</div>
+            <h2>Confirmed!</h2>
+            <p style="color:#666;">Please note your details below.</p>
 
-            <div class="appt-id-box" id="displayApptID">APP-0000</div>
-            <div id="copyMsg">Copied to Clipboard!</div>
-            <button onclick="copyID()" style="background:none; border:none; color:var(--primary-blue); cursor:pointer; font-weight:bold;">Copy ID 📋</button>
+            <div class="appt-id-box">
+                <span class="id-label">Appointment ID</span>
+                <div class="id-number" id="displayApptID">APP-0000</div>
+                <div id="copyMsg">Copied to Clipboard!</div>
+                <button onclick="copyID()" style="background:none; border:none; color:var(--primary-blue); cursor:pointer; font-weight:bold; font-size:12px;">COPY ID 📋</button>
+            </div>
 
             <div class="summary-box">
-                <p><strong>Patient:</strong> <span id="confName">---</span></p>
-                <p><strong>Doctor:</strong> <span id="confDoc">---</span></p>
-                <p><strong>Type:</strong> <span id="confType">---</span></p>
-                <p><strong>Date:</strong> <span id="confDate">---</span></p>
+                <p><span>Patient:</span> <strong id="confName">---</strong></p>
+                <p><span>Doctor:</span> <strong id="confDoc">---</strong></p>
+                <p><span>Type:</span> <strong id="confType">---</strong></p>
+                <p><span>Date:</span> <strong id="confDate">---</strong></p>
             </div>
 
             <button class="btn" onclick="goToToken()">Proceed to Generate Token →</button>
@@ -162,7 +185,6 @@
     </div>
 
     <script>
-        // Set today's date as default
         document.getElementById('apptDate').valueAsDate = new Date();
 
         const defaultDoctors = {
@@ -208,25 +230,25 @@
                 if (response.ok) {
                     const resultData = await response.json();
 
-                    // 1. Save Token
-                    localStorage.setItem('savedToken', resultData.token);
-                    localStorage.setItem('tempTokenID', resultData.token); // For index.html sync
-
-                    // 2. Inject values into Success View (THIS WAS MISSING)
+                    // 1. Data Injection
                     document.getElementById('displayApptID').innerText = resultData.token;
                     document.getElementById('confName').innerText = name;
                     document.getElementById('confDoc').innerText = doctor;
                     document.getElementById('confType').innerText = appType;
                     document.getElementById('confDate').innerText = date;
 
-                    // 3. Switch Views
+                    // 2. Storage
+                    localStorage.setItem('savedToken', resultData.token);
+                    localStorage.setItem('tempTokenID', resultData.token);
+
+                    // 3. UI Switch
                     document.getElementById('bookingView').style.display = 'none';
                     document.getElementById('successView').style.display = 'block';
                 } else {
-                    alert("Booking failed. Please check server.");
+                    alert("Server error. Check if your API is running.");
                 }
             } catch (err) {
-                alert("Server connection failed!");
+                alert("Connection failed! Make sure your Node.js server is active.");
             }
         }
 
