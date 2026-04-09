@@ -264,6 +264,14 @@ body {
     width: 100%;
     overflow-x: hidden; /* Stops horizontal scrolling */
 }
+        @media (max-width: 600px) {
+    .navigation {
+        display: flex;
+        flex-direction: column; /* Stacks Home, About, Login vertically */
+        align-items: center;
+        gap: 15px;
+    }
+}
     </style>
 </head>
 
