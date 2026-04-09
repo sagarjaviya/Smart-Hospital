@@ -10,7 +10,6 @@
             --bg-light: #f4f7f6;
             --emergency-red: #d32f2f;
             --success-green: #28a745;
-            --ticket-bg: #fff9c4;
         }
 
         body {
@@ -20,18 +19,17 @@
             padding: 20px;
             display: flex;
             justify-content: center;
-            min-height: 100vh;
             align-items: center;
+            min-height: 100vh;
         }
 
         .card {
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 450px;
-            transition: all 0.3s ease;
         }
 
         .header {
@@ -58,7 +56,6 @@
             font-size: 15px;
         }
 
-        /* Appointment Type Styling */
         .type-group { display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap; }
         .type-option {
             flex: 1; min-width: 120px; text-align: center; border: 1px solid #ddd;
@@ -72,12 +69,11 @@
         .btn {
             width: 100%; padding: 15px; background: var(--primary-blue); color: white;
             border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
-            cursor: pointer; margin-top: 20px; transition: 0.2s;
+            cursor: pointer; margin-top: 20px;
         }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        /* Success View Styling */
-        #successView { display: none; text-align: center; animation: fadeIn 0.5s ease-out; }
+        /* --- SUCCESS VIEW STYLING (MATCHING IMAGE 2) --- */
+        #successView { display: none; text-align: center; }
         
         .success-icon {
             font-size: 50px; color: var(--success-green); 
@@ -86,16 +82,16 @@
         }
 
         .appt-id-box {
-            background: var(--ticket-bg);
-            border: 2px dashed #fbc02d;
+            background: #eef5ff; /* Light blue background */
+            border: 2px dashed var(--primary-blue); /* Blue dashed border */
             padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-blue);
             border-radius: 8px;
-            margin: 20px 0;
+            margin: 15px 0;
             position: relative;
         }
-
-        .id-label { font-size: 12px; text-transform: uppercase; color: #888; display: block; }
-        .id-number { font-size: 32px; font-weight: bold; color: #333; letter-spacing: 1px; }
 
         .summary-box {
             text-align: left;
@@ -106,15 +102,17 @@
             border-left: 4px solid var(--primary-blue);
         }
 
-        .summary-box p { margin: 8px 0; color: #555; display: flex; justify-content: space-between; }
-        .summary-box strong { color: #222; }
-
-        #copyMsg { color: var(--success-green); font-size: 12px; font-weight: bold; display: none; margin-bottom: 5px;}
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
         }
+        .summary-row:last-child { border: none; }
+        .summary-row span { color: #666; }
+        .summary-row strong { color: #333; }
+
+        #copyMsg { color: var(--success-green); font-size: 12px; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
@@ -163,21 +161,21 @@
 
         <div id="successView">
             <div class="success-icon">✓</div>
-            <h2>Confirmed!</h2>
-            <p style="color:#666;">Please note your details below.</p>
+            <h2 style="margin-top:10px;">Confirmed!</h2>
+            <p style="color:#666;">Your Appointment ID is ready.</p>
 
-            <div class="appt-id-box">
-                <span class="id-label">Appointment ID</span>
-                <div class="id-number" id="displayApptID">APP-0000</div>
-                <div id="copyMsg">Copied to Clipboard!</div>
-                <button onclick="copyID()" style="background:none; border:none; color:var(--primary-blue); cursor:pointer; font-weight:bold; font-size:12px;">COPY ID 📋</button>
-            </div>
+            <div class="appt-id-box" id="displayApptID">APP-0000</div>
+            
+            <div id="copyMsg">Copied to Clipboard!</div>
+            <button onclick="copyID()" style="background:none; border:none; color:var(--primary-blue); cursor:pointer; font-weight:bold; margin-bottom: 10px;">
+                Copy ID 📋
+            </button>
 
             <div class="summary-box">
-                <p><span>Patient:</span> <strong id="confName">---</strong></p>
-                <p><span>Doctor:</span> <strong id="confDoc">---</strong></p>
-                <p><span>Type:</span> <strong id="confType">---</strong></p>
-                <p><span>Date:</span> <strong id="confDate">---</strong></p>
+                <div class="summary-row"><span>Patient:</span> <strong id="confName">---</strong></div>
+                <div class="summary-row"><span>Doctor:</span> <strong id="confDoc">---</strong></div>
+                <div class="summary-row"><span>Type:</span> <strong id="confType">---</strong></div>
+                <div class="summary-row"><span>Date:</span> <strong id="confDate">---</strong></div>
             </div>
 
             <button class="btn" onclick="goToToken()">Proceed to Generate Token →</button>
@@ -198,25 +196,19 @@
             const deptValue = document.getElementById('dept').value;
             const doctorSelect = document.getElementById('doctorSelect');
             const doctorGroup = document.getElementById('doctorGroup');
-
             if (!deptValue) { doctorGroup.style.display = 'none'; return; }
-
-            let finalDocs = defaultDoctors[deptValue] || [];
             doctorGroup.style.display = 'block';
-            doctorSelect.innerHTML = finalDocs.map(doc => `<option value="${doc}">${doc}</option>`).join('');
+            doctorSelect.innerHTML = defaultDoctors[deptValue].map(doc => `<option value="${doc}">${doc}</option>`).join('');
         }
 
         async function bookAppointment() {
             const name = document.getElementById('pName').value;
-            const deptValue = document.getElementById('dept').value;
+            const dept = document.getElementById('dept').value;
             const doctor = document.getElementById('doctorSelect').value;
             const date = document.getElementById('apptDate').value;
             const appType = document.querySelector('input[name="appType"]:checked').value;
 
-            if (!name || !deptValue || !date || !doctor) {
-                alert("Please fill all details.");
-                return;
-            }
+            if (!name || !dept || !date) { alert("Please fill all details."); return; }
 
             const patientData = { patientName: name, doctor: doctor, date: date, type: appType };
 
@@ -230,26 +222,22 @@
                 if (response.ok) {
                     const resultData = await response.json();
 
-                    // 1. Data Injection
+                    // 1. SAVE TO STORAGE
+                    localStorage.setItem('savedToken', resultData.token);
+                    localStorage.setItem('tempTokenID', resultData.token);
+
+                    // 2. INJECT DATA INTO UI (Critical Step)
                     document.getElementById('displayApptID').innerText = resultData.token;
                     document.getElementById('confName').innerText = name;
                     document.getElementById('confDoc').innerText = doctor;
                     document.getElementById('confType').innerText = appType;
                     document.getElementById('confDate').innerText = date;
 
-                    // 2. Storage
-                    localStorage.setItem('savedToken', resultData.token);
-                    localStorage.setItem('tempTokenID', resultData.token);
-
-                    // 3. UI Switch
+                    // 3. SHOW SUCCESS VIEW
                     document.getElementById('bookingView').style.display = 'none';
                     document.getElementById('successView').style.display = 'block';
-                } else {
-                    alert("Server error. Check if your API is running.");
                 }
-            } catch (err) {
-                alert("Connection failed! Make sure your Node.js server is active.");
-            }
+            } catch (err) { alert("Server connection failed!"); }
         }
 
         function copyID() {
