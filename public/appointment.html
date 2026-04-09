@@ -1,15 +1,20 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Book Appointment - Smart Hospital</title>
+
     <style>
         :root {
             --primary-blue: #0b66c3;
             --bg-light: #f4f7f6;
             --emergency-red: #d32f2f;
-            --success-green: #28a745;
         }
 
         body {
@@ -19,8 +24,6 @@
             padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
-            min-height: 100vh;
         }
 
         .card {
@@ -29,7 +32,7 @@
             border-radius: 12px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 450px;
+            max-width: 600px;
         }
 
         .header {
@@ -38,7 +41,10 @@
             padding-bottom: 10px;
         }
 
-        h2 { color: var(--primary-blue); margin: 0; }
+        h2 {
+            color: var(--primary-blue);
+            margin: 0;
+        }
 
         label {
             display: block;
@@ -47,172 +53,396 @@
             color: #333;
         }
 
-        select, input {
+        select,
+        input {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 6px;
             box-sizing: border-box;
             font-size: 15px;
+            margin-bottom: 5px;
         }
 
-        .type-group { display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap; }
-        .type-option {
-            flex: 1; min-width: 120px; text-align: center; border: 1px solid #ddd;
-            padding: 10px; border-radius: 6px; cursor: pointer; transition: 0.3s;
-            font-size: 14px; display: flex; align-items: center; justify-content: center;
+
+
+        /* Appointment Type Styling */
+
+        .type-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+            flex-wrap: wrap;
         }
-        .type-option input { display: none; }
-        .type-option:has(input:checked) { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
-        .type-option.emergency:has(input:checked) { background: var(--emergency-red); border-color: var(--emergency-red); }
+
+        .type-option {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .type-option input {
+            display: none;
+        }
+
+        .type-option:has(input:checked) {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+
+        .type-option.emergency:has(input:checked) {
+            background: var(--emergency-red);
+            border-color: var(--emergency-red);
+        }
+
+        .emergency-text {
+            color: var(--emergency-red);
+            font-weight: bold;
+        }
+
+
 
         .btn {
-            width: 100%; padding: 15px; background: var(--primary-blue); color: white;
-            border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
-            cursor: pointer; margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
         }
 
-        /* --- SUCCESS VIEW STYLING (MATCHING IMAGE 2) --- */
-        #successView { display: none; text-align: center; }
-        
-        .success-icon {
-            font-size: 50px; color: var(--success-green); 
-            background: #e8f5e9; width: 80px; height: 80px; 
-            line-height: 80px; border-radius: 50%; margin: 0 auto 15px;
+        .btn:hover {
+            background: #084c98;
+        }
+
+        #successView {
+            display: none;
+            text-align: center;
+        }
+
+        .id-container {
+            position: relative;
+            margin: 20px 0;
         }
 
         .appt-id-box {
-            background: #eef5ff; /* Light blue background */
-            border: 2px dashed var(--primary-blue); /* Blue dashed border */
+            background: #eef5ff;
+            border: 2px dashed var(--primary-blue);
             padding: 20px;
             font-size: 28px;
             font-weight: bold;
             color: var(--primary-blue);
             border-radius: 8px;
-            margin: 15px 0;
-            position: relative;
+            display: block;
         }
 
-        .summary-box {
-            text-align: left;
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid var(--primary-blue);
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
         }
 
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
+        #copyMsg {
+            color: #28a745;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+            margin-top: -15px;
+            margin-bottom: 10px;
         }
-        .summary-row:last-child { border: none; }
-        .summary-row span { color: #666; }
-        .summary-row strong { color: #333; }
-
-        #copyMsg { color: var(--success-green); font-size: 12px; font-weight: bold; display: none; }
     </style>
+
 </head>
+
 <body>
 
+
+
     <div class="card">
+
         <div id="bookingView">
+
             <div class="header">
+
                 <h2>Book Appointment</h2>
+
+                <p style="font-size: 14px; color: #666;">Select your preferred department and doctor.</p>
+
             </div>
+
+
 
             <label>Patient Full Name</label>
+
             <input type="text" id="pName" placeholder="Enter patient name">
 
+
+
             <label>Select Department</label>
+
             <select id="dept" onchange="loadDoctors()">
+
                 <option value="">-- Choose Department --</option>
+
                 <option value="General Medicine">General Medicine</option>
+
                 <option value="ORTHO">Orthopedics (ORTHO)</option>
+
                 <option value="ENT">ENT Specialists</option>
+
                 <option value="Pediatrics">Pediatrics</option>
+
             </select>
 
+
+
             <div id="doctorGroup" style="display: none; margin-top: 15px;">
+
                 <label>Select Doctor</label>
+
                 <select id="doctorSelect"></select>
+
             </div>
+
+
 
             <label>Appointment Type</label>
+
             <div class="type-group">
+
                 <label class="type-option">
+
                     <input type="radio" name="appType" value="Regular" checked> Regular
+
                 </label>
+
                 <label class="type-option">
+
                     <input type="radio" name="appType" value="Walk-in"> Walk-in
+
                 </label>
+
                 <label class="type-option emergency">
+
                     <input type="radio" name="appType" value="Emergency"> 🚨 Emergency
+
                 </label>
+
             </div>
+
+
 
             <label style="margin-top: 15px;">Select Date</label>
+
             <input type="date" id="apptDate">
 
+
+
+            <label>Reason for Visit</label>
+
+            <input type="text" id="reason" placeholder="Fever, Checkup, etc.">
+
+
+
             <button class="btn" onclick="bookAppointment()">Confirm Appointment</button>
+
         </div>
+
+
 
         <div id="successView">
-            <div class="success-icon">✓</div>
-            <h2 style="margin-top:10px;">Confirmed!</h2>
-            <p style="color:#666;">Your Appointment ID is ready.</p>
 
-            <div class="appt-id-box" id="displayApptID">APP-0000</div>
-            
-            <div id="copyMsg">Copied to Clipboard!</div>
-            <button onclick="copyID()" style="background:none; border:none; color:var(--primary-blue); cursor:pointer; font-weight:bold; margin-bottom: 10px;">
-                Copy ID 📋
-            </button>
+            <div style="font-size: 50px; color: #28a745;">✓</div>
 
-            <div class="summary-box">
-                <div class="summary-row"><span>Patient:</span> <strong id="confName">---</strong></div>
-                <div class="summary-row"><span>Doctor:</span> <strong id="confDoc">---</strong></div>
-                <div class="summary-row"><span>Type:</span> <strong id="confType">---</strong></div>
-                <div class="summary-row"><span>Date:</span> <strong id="confDate">---</strong></div>
+            <h2 style="margin-top:10px;">Appointment Booked!</h2>
+
+            <p>Your appointment has been scheduled. Please note your ID:</p>
+
+
+
+            <div class="id-container">
+
+                <div class="appt-id-box" id="displayApptID">APP-0000</div>
+
+                <button class="copy-btn" onclick="copyID()">Copy 📋</button>
+
             </div>
 
+            <div id="copyMsg">Copied to Clipboard!</div>
+
+
+
+            <div style="text-align: left; background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+
+                <p style="margin: 5px 0;"><strong>Patient:</strong> <span id="confName">---</span></p>
+
+                <p style="margin: 5px 0;"><strong>Doctor:</strong> <span id="confDoc">---</span></p>
+
+                <p style="margin: 5px 0;"><strong>Type:</strong> <span id="confType"
+                        style="font-weight: bold;">---</span></p>
+
+                <p style="margin: 5px 0;"><strong>Date:</strong> <span id="confDate">---</span></p>
+
+            </div>
+
+
+
+            <p style="color:#d9534f; font-size:13px; font-weight: bold;">* Click Copy and paste this ID in the next step
+            </p>
+
+
+
             <button class="btn" onclick="goToToken()">Proceed to Generate Token →</button>
+
         </div>
+
     </div>
 
+
+
     <script>
-        document.getElementById('apptDate').valueAsDate = new Date();
 
         const defaultDoctors = {
-            "General Medicine": ["Dr. Sunita Gupta", "Dr. Priya Iyer"],
-            "ORTHO": ["Dr. Sandeep Verma", "Dr. Megha Deshmukh"],
-            "ENT": ["Dr. Minsh Chanwla", "Dr. Kavita Nair"],
-            "Pediatrics": ["Dr. Anjali Patil", "Dr. Rahul Bose"]
+
+            "General Medicine": [
+                "Dr. Sunita Gupta",
+                "Dr. Priya Iyer",
+                "Dr. Rajesh Sharma",
+                "Dr. Vikram Malhotra",
+                "Dr. Amit Trivedi"
+            ],
+
+            "ORTHO": [
+                "Dr. Sandeep Verma",
+                "Dr. Megha Deshmukh",
+                "Dr. Arvind Kulkarni",
+                "Dr. Sneha Reddy",
+                "Dr. Rohan Joshi"
+            ],
+
+            "ENT": [
+                "Dr. Minsh Chanwla",
+                "Dr. Kavita Nair",
+                "Dr. Suresh Hegde",
+                "Dr. Pooja Saxena",
+                "Dr. Deeepak Mishra"
+            ],
+
+            "Pediatrics": [
+                "Dr. Anjali Patil",
+                "Dr. Rahul Bose",
+                "Dr. Neha Agarwal",
+                "Dr. Sameer Rai",
+                "Dr. Ishita Das"
+            ]
+
         };
 
-        function loadDoctors() {
-            const deptValue = document.getElementById('dept').value;
-            const doctorSelect = document.getElementById('doctorSelect');
-            const doctorGroup = document.getElementById('doctorGroup');
-            if (!deptValue) { doctorGroup.style.display = 'none'; return; }
-            doctorGroup.style.display = 'block';
-            doctorSelect.innerHTML = defaultDoctors[deptValue].map(doc => `<option value="${doc}">${doc}</option>`).join('');
-        }
 
+
+        // आज की तारीख सेट करना ताकि पास्ट डेट सेलेक्ट न हो सके
+
+        document.getElementById('apptDate').valueAsDate = new Date();
+
+
+
+        function loadDoctors() {
+
+            const deptValue = document.getElementById('dept').value;
+
+            const doctorSelect = document.getElementById('doctorSelect');
+
+            const doctorGroup = document.getElementById('doctorGroup');
+
+
+
+            if (!deptValue) {
+
+                doctorGroup.style.display = 'none';
+
+                return;
+
+            }
+
+
+
+            let allRegisteredDocs = JSON.parse(localStorage.getItem('doctorsList')) || [];
+
+            let filteredDocs = allRegisteredDocs
+
+                .filter(d => d.specialty === deptValue)
+
+                .map(d => "Dr. " + d.name);
+
+
+
+            let finalDocs = filteredDocs.length > 0 ? filteredDocs : (defaultDoctors[deptValue] || []);
+
+
+
+            if (finalDocs.length > 0) {
+
+                doctorGroup.style.display = 'block';
+
+                doctorSelect.innerHTML = finalDocs.map(doc => `<option value="${doc}">${doc}</option>`).join('');
+
+            } else {
+
+                doctorSelect.innerHTML = '<option value="">No doctors available</option>';
+
+                doctorGroup.style.display = 'block';
+
+            }
+
+        }
         async function bookAppointment() {
             const name = document.getElementById('pName').value;
-            const dept = document.getElementById('dept').value;
+            const deptValue = document.getElementById('dept').value;
             const doctor = document.getElementById('doctorSelect').value;
             const date = document.getElementById('apptDate').value;
-            const appType = document.querySelector('input[name="appType"]:checked').value;
 
-            if (!name || !dept || !date) { alert("Please fill all details."); return; }
+            const appTypeElement = document.querySelector('input[name="appType"]:checked');
+            const appType = appTypeElement ? appTypeElement.value : 'Regular';
 
-            const patientData = { patientName: name, doctor: doctor, date: date, type: appType };
+            if (!name || !deptValue || !date || !doctor) {
+                alert("Please fill all details.");
+                return;
+            }
+
+            // Move this BEFORE the try block so it is defined correctly
+            const patientData = {
+                patientName: name,
+                doctor: doctor,
+                date: date,
+                type: appType
+            };
 
             try {
+                // Change the URL to match your server route exactly
                 const response = await fetch('http://localhost:5000/api/book', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -222,34 +452,49 @@
                 if (response.ok) {
                     const resultData = await response.json();
 
-                    // 1. SAVE TO STORAGE
+                    // CRITICAL: Save the token for the next page to use
                     localStorage.setItem('savedToken', resultData.token);
-                    localStorage.setItem('tempTokenID', resultData.token);
 
-                    // 2. INJECT DATA INTO UI (Critical Step)
-                    document.getElementById('displayApptID').innerText = resultData.token;
-                    document.getElementById('confName').innerText = name;
-                    document.getElementById('confDoc').innerText = doctor;
-                    document.getElementById('confType').innerText = appType;
-                    document.getElementById('confDate').innerText = date;
-
-                    // 3. SHOW SUCCESS VIEW
                     document.getElementById('bookingView').style.display = 'none';
                     document.getElementById('successView').style.display = 'block';
+                    document.getElementById('displayApptID').innerText = resultData.token;
+                } else {
+                    const errorData = await response.json();
+                    alert("Error: " + (errorData.details || "Check terminal"));
                 }
-            } catch (err) { alert("Server connection failed!"); }
+            } catch (err) {
+                console.error("Connection Error:", err);
+                alert("Server connection failed!");
+            }
         }
-
         function copyID() {
+
             const idText = document.getElementById('displayApptID').innerText;
+
             navigator.clipboard.writeText(idText).then(() => {
+
                 const msg = document.getElementById('copyMsg');
+
                 msg.style.display = 'block';
+
                 setTimeout(() => { msg.style.display = 'none'; }, 2000);
+
             });
+
         }
 
-        function goToToken() { window.location.href = 'generate-token.html'; }
+
+
+        function goToToken() {
+
+            window.location.href = 'generate-token.html';
+
+        }
+
     </script>
+
+
+
 </body>
+
 </html>
