@@ -14,60 +14,39 @@
             --light-gray: #f8f9fa;
         }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
             background-color: #fff;
+            width: 100%;
+            overflow-x: hidden;
         }
 
-        /* --- ✨ Underline Effect (Sirf Links ke liye) --- */
-        .navigation a,
-        .logout-link {
-            text-decoration: none;
-            color: var(--header-text);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            padding-bottom: 2px;
-            transition: all 0.2s ease;
-        }
-
-        /* Hover Effect */
-        .navigation a:hover {
-            color: var(--primary-blue);
-        }
-
-        /* CLICK EFFECT: Sirf Navigation Links aur Logout par Underline aayegi */
-        .navigation a:active,
-        .logout-link:active {
-            border-bottom: 3px solid #000 !important;
-            color: #000 !important;
-        }
-
-        /* --- 🚫 Logo Section (Underline Hatane ke liye) --- */
-        .logo-container {
-            font-size: 1.5em;
-            font-weight: bold;
-            text-decoration: none;
-            color: var(--header-text);
-            cursor: pointer;
-            user-select: none;
-            border-bottom: none !important;
-            /* Underline band */
-        }
-
-        /* Logo par click karne par kuch nahi hoga (Simple rahega) */
-        .logo-container:active {
-            border-bottom: none !important;
-            text-decoration: none !important;
-        }
-
-        /* --- Rest of the Styling --- */
+        /* --- Navigation & Header --- */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px 5%;
             border-bottom: 1px solid #eee;
+            background: #fff;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--header-text);
+            cursor: pointer;
+            user-select: none;
+            text-decoration: none;
         }
 
         .navigation {
@@ -78,6 +57,14 @@
         .navigation a {
             margin-left: 25px;
             font-weight: 500;
+            text-decoration: none;
+            color: var(--header-text);
+            transition: color 0.2s;
+            font-size: 14px;
+        }
+
+        .navigation a:hover {
+            color: var(--primary-blue);
         }
 
         .login-nav-btn {
@@ -92,40 +79,11 @@
             transition: 0.3s;
         }
 
-        .login-nav-btn:hover {
-            background: #0056b3;
-        }
-
-        .login-nav-btn:active {
-            text-decoration: underline;
-        }
-
-        .profile-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-left: 20px;
-        }
-
-        .profile-circle {
-            width: 40px;
-            height: 40px;
-            background: #a855f7;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            border: 2px solid #ddd;
-            cursor: pointer;
-        }
-
+        /* --- Hero Section --- */
         .hero-section {
             display: flex;
             justify-content: center;
-            padding: 60px 5%;
+            padding: 40px 5%;
         }
 
         .hero-content {
@@ -138,12 +96,26 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
+            flex-wrap: wrap; /* Allows stacking on mobile */
+            text-align: left;
+        }
+
+        .text-content {
+            flex: 1;
+            min-width: 300px;
         }
 
         .text-content h1 {
-            font-size: 3em;
-            margin: 0;
+            font-size: clamp(2em, 5vw, 3.5em); /* Fluid typography */
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .hero-content img {
+            max-width: 100%;
+            height: auto;
+            width: 350px;
+            z-index: 10;
         }
 
         .gen-btn {
@@ -153,23 +125,22 @@
             border-radius: 8px;
             font-weight: bold;
             border: none;
-            margin-top: 20px;
+            margin-top: 25px;
             font-size: 1.1em;
             cursor: pointer;
+            transition: transform 0.2s;
         }
 
         .gen-btn:active {
-            text-decoration: underline;
+            transform: scale(0.95);
         }
 
-        /* Dashboard Modal Styles */
+        /* --- Dashboard Modal --- */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6);
             z-index: 2000;
             justify-content: center;
@@ -179,22 +150,15 @@
         .dashboard-card {
             background: white;
             width: 90%;
-            max-width: 450px;
+            max-width: 400px;
             border-radius: 20px;
             overflow: hidden;
             animation: slideIn 0.3s ease-out;
         }
 
         @keyframes slideIn {
-            from {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .dash-header {
@@ -204,84 +168,72 @@
             text-align: center;
         }
 
-        .dash-body {
-            padding: 25px;
-        }
-
-        .user-info-box {
-            border-bottom: 2px solid var(--light-gray);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
+        .profile-circle {
+            width: 50px; height: 50px;
+            background: #a855f7;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-        }
-
-        .info-value {
-            font-size: 16px;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .active-token-card {
-            background: #f0f7ff;
-            border: 1px dashed var(--primary-blue);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .cancel-btn {
-            background: #fff1f0;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            padding: 10px 20px;
-            border-radius: 6px;
+            margin: 0 auto 10px;
             cursor: pointer;
-            width: 100%;
-            margin-top: 15px;
+            border: 2px solid #fff;
         }
 
-        .logout-link {
-            display: inline-block;
-            text-align: center;
-            margin-top: 20px;
-            color: #888;
-            font-size: 14px;
+        .dash-body { padding: 20px; }
+
+        /* --- Responsive Media Queries --- */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .navigation {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .navigation a {
+                margin: 0 10px;
+                font-size: 13px;
+            }
+
+            .login-nav-btn {
+                margin-left: 0;
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .hero-content {
+                padding: 40px 20px;
+                text-align: center;
+                flex-direction: column;
+            }
+
+            .hero-content img {
+                width: 250px;
+                margin-top: 30px;
+            }
+            
+            .text-content {
+                min-width: 100%;
+            }
         }
-
-        * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box; /* Prevents overflow caused by padding */
-}
-
-body {
-    width: 100%;
-    overflow-x: hidden; /* Stops horizontal scrolling */
-}
-        @media (max-width: 600px) {
-    .navigation {
-        display: flex;
-        flex-direction: column; /* Stacks Home, About, Login vertically */
-        align-items: center;
-        gap: 15px;
-    }
-}
     </style>
 </head>
 
 <body>
 
     <header class="header">
-        <div class="logo-container" onclick="location.reload()"
-            style="display: flex; align-items: center; gap: 10px; border-bottom: none !important;">
-            <img src="logo.png" alt="Smart Hospital Logo" style="width: 35px; height: 35px; object-fit: contain;">
-            <span style="font-size: 24px; color: #343a40;">Smart Hospital</span>
+        <div class="logo-container" onclick="location.reload()">
+            <img src="logo.png" alt="Logo" style="width: 35px; height: 35px;">
+            <span>Smart Hospital</span>
         </div>
         <nav class="navigation">
             <a href="index.html">HOME</a>
@@ -297,43 +249,33 @@ body {
         <div class="hero-content">
             <div class="text-content">
                 <h1>Ready to <br>Help You.</h1>
-                <p>Login to your profile to manage your appointments.</p>
+                <p>Login to your profile to manage your appointments and track your health.</p>
                 <button class="gen-btn" onclick="handleMainAction()">Generate e-Token →</button>
             </div>
-            <img src="image/header_img-DhAi3lLA.png" width="350" style="z-index: 10;">
+            <img src="image/header_img-DhAi3lLA.png" alt="Healthcare Image">
         </div>
     </div>
 
     <div id="dashboardModal" class="modal-overlay">
         <div class="dashboard-card">
             <div class="dash-header">
-                <div class="profile-circle"
-                    style="margin: 0 auto 10px; width: 60px; height: 60px; font-size: 24px; background: white; color: var(--primary-blue);">
-                    <span id="dashInitial">P</span>
-                </div>
+                <div class="profile-circle" id="dashInitial">P</div>
                 <h3 id="dashName">Patient Name</h3>
                 <span id="dashMobile" style="font-size: 14px; opacity: 0.9;">+91 0000000000</span>
             </div>
             <div class="dash-body">
-                <div class="user-info-box">
-                    <div class="info-label">Status</div>
-                    <div class="info-value">Patient verified ✅</div>
+                <div style="margin-bottom: 20px;">
+                    <p style="font-size: 12px; color: #888;">STATUS</p>
+                    <p style="font-weight: 600;">Patient Verified ✅</p>
                 </div>
-                <div id="tokenSection">
-                    <div class="info-label">Active Appointment</div>
-                    <div class="active-token-card">
-                        <div id="dashToken" style="font-size: 32px; font-weight: bold; color: var(--primary-blue);">--
-                        </div>
-                        <div id="dashDoc" style="font-size: 14px; color: #555;">Doctor: Not Assigned</div>
-                        <button class="cancel-btn" onclick="cancelToken()">Cancel This Token</button>
-                    </div>
+                <div style="background: #f0f7ff; border: 1px dashed var(--primary-blue); padding: 15px; border-radius: 12px; text-align: center;">
+                    <p style="font-size: 12px; color: #888;">ACTIVE TOKEN</p>
+                    <div id="dashToken" style="font-size: 28px; font-weight: bold; color: var(--primary-blue);">--</div>
                 </div>
-                <div style="text-align: center;">
-                    <a class="logout-link" onclick="logout()">Logout from Device</a>
+                <button onclick="closeDashboard()" style="width:100%; background:#eee; border:none; padding:12px; margin-top:15px; border-radius:8px; cursor:pointer; font-weight:bold;">Close</button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" onclick="logout()" style="color: var(--danger); text-decoration: none; font-size: 13px; font-weight: bold;">Logout from Device</a>
                 </div>
-                <button onclick="closeDashboard()"
-                    style="width:100%; background:#eee; border:none; padding:10px; margin-top:10px; border-radius:6px; cursor:pointer;">Close
-                    Dashboard</button>
             </div>
         </div>
     </div>
@@ -348,21 +290,21 @@ body {
                 const mainBtn = document.querySelector('.gen-btn');
                 if (mainBtn) mainBtn.innerText = "Book Appointment Now →";
 
-                // PASTE IT HERE inside the innerHTML template:
                 authArea.innerHTML = `
-            <div class="profile-area">
-                <span style="font-size:14px; color:#555;">Hi, ${userName.split(' ')[0]}</span>
-                <div class="profile-circle" onclick="openDashboard()">${initial}</div>
-                
-                <a href="javascript:void(0)" onclick="logout()" style="margin-left:15px; font-size:12px; color:var(--danger); font-weight:bold; text-decoration:none;">LOGOUT</a>
-            </div>
-        `;
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size:13px; color:#555;">Hi, ${userName.split(' ')[0]}</span>
+                        <div class="profile-circle" style="margin:0; width:35px; height:35px;" onclick="openDashboard()">${initial}</div>
+                    </div>
+                `;
             }
         }
 
         function handleMainAction() {
-            if (localStorage.getItem('loggedInUser')) { window.location.href = 'appointment.html'; }
-            else { window.location.href = 'patient-login.html'; }
+            if (localStorage.getItem('loggedInUser')) { 
+                window.location.href = 'appointment.html'; 
+            } else { 
+                window.location.href = 'patient-login.html'; 
+            }
         }
 
         function openDashboard() {
@@ -370,33 +312,26 @@ body {
             const userPhone = localStorage.getItem('userPhone');
             const token = localStorage.getItem('tempTokenID');
             if (!userName) return;
+            
             document.getElementById('dashName').innerText = userName;
             document.getElementById('dashMobile').innerText = "+91 " + (userPhone || "XXXXXXXXXX");
             document.getElementById('dashInitial').innerText = userName.charAt(0).toUpperCase();
-            document.getElementById('dashToken').innerText = token || "--";
+            document.getElementById('dashToken').innerText = token || "No Active Token";
             document.getElementById('dashboardModal').style.display = 'flex';
         }
 
-        function closeDashboard() { document.getElementById('dashboardModal').style.display = 'none'; }
-
-        function cancelToken() {
-            if (confirm("Cancel appointment?")) {
-                localStorage.removeItem('tempTokenID');
-                location.reload();
-            }
+        function closeDashboard() { 
+            document.getElementById('dashboardModal').style.display = 'none'; 
         }
 
         function logout() {
             if (confirm("Are you sure you want to logout?")) {
-                // Clear everything: Name, Phone, and Tokens
                 localStorage.clear();
-
-                // Redirect to index or reload to reset the UI
                 window.location.href = 'index.html';
             }
         }
+        
         window.onload = init;
     </script>
 </body>
-
 </html>
