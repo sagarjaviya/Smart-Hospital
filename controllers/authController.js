@@ -1,13 +1,12 @@
 const db = require('../config/db');
 
 exports.registerPatient = async (req, res) => {
-    // Make sure 'age' is included here!
     const { name, email, password, phone, age } = req.body;
 
     try {
-        // Updated query to include age
+        // PostgreSQL uses $1, $2, etc. instead of ?
         await db.query(
-            'INSERT INTO patients (name, email, password, phone, age) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO patients (name, email, password, phone, age) VALUES ($1, $2, $3, $4, $5)',
             [name, email, password, phone, age]
         );
         res.status(201).json({ message: 'Patient registered successfully!' });
@@ -20,33 +19,35 @@ exports.registerPatient = async (req, res) => {
 exports.loginPatient = async (req, res) => {
     const { phone } = req.body;
     try {
-        // Find user by phone number
-        const [results] = await db.query('SELECT * FROM patients WHERE phone = ?', [phone]);
+        // PostgreSQL: Use $1
+        const results = await db.query('SELECT * FROM patients WHERE phone = $1', [phone]);
 
-        if (results.length > 0) {
+        // With 'pg' library, results are inside results.rows
+        if (results.rows && results.rows.length > 0) {
             res.status(200).json({ 
                 message: 'Login successful', 
-                user: results[0] 
+                user: results.rows[0] 
             });
         } else {
             res.status(404).json({ message: 'Number not found' });
         }
     } catch (err) {
+        console.error("LOGIN ERROR:", err.message);
         res.status(500).json({ error: 'Database error' });
     }
 };
-// Add this to your authController.js
+
 exports.registerDoctor = async (req, res) => {
     const { name, email, password, specialization } = req.body;
 
-    // Check if any field is empty
     if (!name || !email || !password || !specialization) {
         return res.status(400).json({ error: "All fields are required" });
     }
 
     try {
+        // PostgreSQL: Use $1, $2, $3, $4
         await db.query(
-            'INSERT INTO doctors (name, email, password, specialization) VALUES (?, ?, ?, ?)',
+            'INSERT INTO doctors (name, email, password, specialization) VALUES ($1, $2, $3, $4)',
             [name, email, password, specialization]
         );
         res.status(201).json({ message: 'Doctor registered successfully!' });
@@ -55,19 +56,23 @@ exports.registerDoctor = async (req, res) => {
         res.status(500).json({ error: 'Database error: ' + err.message });
     }
 };
+
 exports.loginDoctor = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const [results] = await db.query(
-            'SELECT * FROM doctors WHERE email = ? AND password = ?', 
+        // PostgreSQL: Use $1, $2
+        const results = await db.query(
+            'SELECT * FROM doctors WHERE email = $1 AND password = $2', 
             [email, password]
         );
-        if (results.length > 0) {
-            res.status(200).json({ message: 'Login successful', doctor: results[0] });
+
+        if (results.rows && results.rows.length > 0) {
+            res.status(200).json({ message: 'Login successful', doctor: results.rows[0] });
         } else {
             res.status(401).json({ error: 'Invalid email or password' });
         }
     } catch (err) {
+        console.error("DOC LOGIN ERROR:", err.message);
         res.status(500).json({ error: 'Server error' });
     }
 };
