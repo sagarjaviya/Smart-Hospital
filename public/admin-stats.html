@@ -28,10 +28,20 @@
             padding: 20px;
         }
 
-        .main-content {
-            margin-left: 280px;
-            padding: 30px;
-        }
+       .main-content {
+    margin-left: 0; /* Default for mobile */
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .main-content { margin-left: 280px; } /* Only apply margin on laptops */
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Automatically stacks cards */
+    gap: 20px;
+}
 
         .header {
             display: flex;
